@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# require './lib/fetcher'
+require './lib/jsonfetcher'
+# require './lib/mockfetcher'
+require './lib/compiler'
+
+require 'time'
+
+D_SUB = 'talesfromtechsupport'.freeze
+D_TYPE = :top
+D_COUNT = 3
+NOWSTRING = Time.now.strftime('%Y-%m-%d-%H%M').freeze
+
+ID = [D_SUB, D_TYPE, NOWSTRING].freeze
+DEST_DIR = "./#{ID.join('_')}".freeze
+TITLE = ID.join(' ').freeze
+
+STYLESHEET = './static/stylesheet.css'.freeze
+
+if Dir.exist?(DEST_DIR) && (Dir.entries(DEST_DIR) - %w(. ..)).any?
+  raise "#{DEST_DIR} is not empty."
+end
+
+data = Rindle::Fetcher.new(
+  D_SUB,
+  D_TYPE
+).fetch(
+  D_COUNT
+)
+
+# Rindle::Compiler.new(DEST_DIR, STYLESHEET).compile(TITLE, data)
