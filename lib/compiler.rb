@@ -12,14 +12,14 @@ module Rindle
       @stylesheet = stylesheet
     end
 
-    def compile(title, contents)
-      html = build_html(title, contents)
+    def compile(title, posts)
+      html = build_html(title, posts)
       opf = build_opf(title)
       assemble(opf, html)
     end
 
-    def build_html(title, contents)
-      Nokogiri::HTML::Builder.new { |doc|
+    def build_html(title, posts)
+      Nokogiri::HTML::Builder.new(encoding: 'utf-8') { |doc|
         doc.html {
           doc.head {
             doc.title { doc.text title }
@@ -33,19 +33,31 @@ module Rindle
             doc.div(id: 'titlepage') {
               doc.h1 { doc.text title }
               doc.h2 {
-                unit = simple_plural('post', contents.size)
-                doc.text "#{contents.size} #{unit}"
+                unit = simple_plural('post', posts.size)
+                doc.text "#{posts.size} #{unit}"
               }
             }
             doc.div(id: 'tableofcontents') {
               doc.h1 { doc.text 'Posts' }
+              doc.ol {
+                posts.each do |post|
+                  doc.li {
+                    doc.a(href: "\##{post.uid}") {
+                      doc.text post.title
+                    }
+                  }
+                end
+              }
             }
             doc.div(id: 'postwrapper') {
-              contents.each do |post|
-                doc.div(class: 'post') {
+              posts.each do |post|
+                doc.div(class: 'post', id: post.uid) {
                   doc.h1 { doc.text post.title }
                   doc.h2 { doc.text "by #{post.author}" }
-                  doc.p { doc.text post.body }
+                  doc.p {
+                    body = Nokogiri::HTML::DocumentFragment.parse(post.body)
+                    doc << body.content
+                  }
                 }
               end
             }
