@@ -11,36 +11,38 @@ D_COUNT = 100
 NOWSTRING = Time.now.strftime('%Y-%m-%d-%H%M').freeze
 
 ID = [D_SUB, D_TYPE, NOWSTRING].freeze
-DEST_DIR = "./#{ID.join('_')}".freeze
+TITLE_SLUG = "./#{ID.join('_')}".freeze
 TITLE = ID.join(' ').freeze
 
-STYLESHEET = './static/stylesheet.css'.freeze
+STYLESHEET = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static").freeze
 
-raise "#{DEST_DIR} is not empty" if Dir.exist?(DEST_DIR) && (Dir.entries(DEST_DIR) - %w(. ..)).any?
+raise "./#{TITLE_SLUG} not empty" if Dir.exist?("./#{TITLE_SLUG}") && (Dir.entries("./#{TITLE_SLUG}") - %w(. ..)).any?
 
-puts 'Locating kindlegen...'
+puts 'Locating kindlegen'
 kindlegen_found = system('which kindlegen')
 abort unless kindlegen_found
-puts
+puts "Done.\n"
 
-puts 'Fetching posts...'
+puts 'Fetching posts'
 posts = Rindle::Fetcher.new(
   D_SUB,
   D_TYPE
 ).fetch(
   D_COUNT
 )
-puts
+puts "Done.\n"
 
-puts 'Compiling to eBook source...'
+puts 'Compiling to eBook source'
 metadata_file = Rindle::Compiler.new(
-  DEST_DIR,
+  TITLE_SLUG,
   STYLESHEET
 ).compile(
   TITLE,
   posts
 )
-puts
+puts "Done.\n"
 
-puts 'Invoking kindlegen...'
-system("kindlegen #{metadata_file}")
+puts 'Invoking kindlegen'
+system("kindlegen #{metadata_file} -o output.mobi")
+FileUtils.cp("#{File.dirname(metadata_file)}/output.mobi", "./#{TITLE_SLUG}.mobi")
+puts 'Done.'
