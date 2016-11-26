@@ -9,14 +9,14 @@ HTTP_REDIRECT = %w(301 302).map(&:freeze).freeze
 
 module Rindle
   class Fetcher
-    def initialize(subreddit, type=hot)
+    def initialize(subreddit, type = hot)
       @uri = URI("https://reddit.com/r/#{subreddit}/#{type}/.json")
     end
 
     def fetch(count)
       puts "Fetching #{@uri}..."
       response = Net::HTTP.get_response(@uri)
-      
+
       while HTTP_REDIRECT.include?(response.code)
         @uri = URI(response.header['location'])
         puts "Redirecting to #{@uri}..."
@@ -26,7 +26,7 @@ module Rindle
       unless HTTP_SUCCESS.include?(response.code)
         raise "Received response code #{response.code}: #{response.message}"
       end
-      
+
       json = response.body
       obj = JSON.parse(json)
       extract(count, obj)

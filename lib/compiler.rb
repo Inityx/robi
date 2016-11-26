@@ -70,11 +70,11 @@ module Rindle
       Nokogiri::XML::Builder.new { |xml|
         xml.root {
           xml.product {
-            # TODO fix metadata with namespaces
+            # TODO: fix metadata with namespaces
             xml.manifest {
               xml.item(
                 :id => 'text',
-                'media-type'.to_sym => 'text/x-oeb1-document',
+                :'media-type' => 'text/x-oeb1-document',
                 :href => "#{HTML}#postwrapper"
               )
             }

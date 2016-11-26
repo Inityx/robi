@@ -1,0 +1,11 @@
+Style/BlockDelimiters:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Max: 10
+
+Metrics/LineLength:
+  Max: 120
