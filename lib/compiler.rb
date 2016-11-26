@@ -1,21 +1,28 @@
 require 'nokogiri'
 require 'fileutils'
 
-HTML = 'index.html'
-OPF = 'metadata.opf'
-STYLE = 'stylesheet.css'
-
 module Rindle
   class Compiler
+    HTML = 'index.html'
+    METADATA = 'metadata.opf'
+    STYLE = 'stylesheet.css'
+
     def initialize(dest_dir, stylesheet)
       @dest_dir = dest_dir
       @stylesheet = stylesheet
     end
 
     def compile(title, posts)
+      puts '  Building HTML...'
       html = build_html(title, posts)
-      opf = build_opf(title)
-      assemble(opf, html)
+
+      puts '  Building metadata...'
+      metadata = build_metadata(title)
+
+      puts '  Assembling files...'
+      assemble(metadata, html)
+
+      "#{@dest_dir}/#{METADATA}"
     end
 
     def build_html(title, posts)
@@ -66,7 +73,7 @@ module Rindle
       }.to_html
     end
 
-    def build_opf(title)
+    def build_metadata(title)
       Nokogiri::XML::Builder.new { |xml|
         xml.root {
           xml.product {
@@ -78,6 +85,9 @@ module Rindle
                 :href => "#{HTML}#postwrapper"
               )
             }
+            xml.spine  { # TODO: ToC
+              xml.itemref(idref: 'text')
+            }
             xml.guide {
               xml.reference(type: 'text', title: title, href: HTML)
             }
@@ -86,11 +96,14 @@ module Rindle
       }.to_xml
     end
 
-    def assemble(opf, html)
+    def assemble(metadata, html)
       Dir.mkdir(@dest_dir) unless Dir.exist?(@dest_dir)
       File.open("#{@dest_dir}/#{HTML}", 'w') { |file| file.write(html) }
-      File.open("#{@dest_dir}/#{OPF}",  'w') { |file| file.write(opf) }
+      File.open("#{@dest_dir}/#{METADATA}",  'w') { |file| file.write(metadata) }
       FileUtils.cp(@stylesheet, "#{@dest_dir}/#{STYLE}")
+    end
+
+    def convert
     end
 
     def simple_plural(word, count)

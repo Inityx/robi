@@ -14,20 +14,20 @@ module Rindle
     end
 
     def fetch(count)
-      puts "Fetching #{@uri}..."
+      puts "  Connecting to #{@uri}..."
       response = Net::HTTP.get_response(@uri)
 
       while HTTP_REDIRECT.include?(response.code)
         @uri = URI(response.header['location'])
-        puts "Redirecting to #{@uri}..."
+        puts "  Redirecting to #{@uri}..."
         response = Net::HTTP.get_response(@uri)
       end
 
-      unless HTTP_SUCCESS.include?(response.code)
-        raise "Received response code #{response.code}: #{response.message}"
-      end
+      raise "Received response code #{response.code}: #{response.msg}" unless HTTP_SUCCESS.include?(response.code)
 
       json = response.body
+
+      puts '  Extracting content...'
       obj = JSON.parse(json)
       extract(count, obj)
     end
