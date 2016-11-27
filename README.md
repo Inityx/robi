@@ -1,2 +1,2 @@
 # rindle
-A Ruby utility to package Reddit text posts as Kindle-friendly HTML bundles
+A Ruby utility to bundle Reddit text posts as a Kindle eBook
