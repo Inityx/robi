@@ -1,0 +1,23 @@
+h1 { text-align: center; }
+h2 { text-align: center; }
+h3 { text-align: center; }
+
+
+#titlepage {
+    page-break-after: always;
+    padding-top: 40%;
+}
+
+
+#tableofcontents {
+    page-break-after: always;
+}
+
+#tableofcontents ol {
+    margin: 0 10%;
+}
+
+
+.post {
+    page-break-after: always;
+}
