@@ -34,12 +34,12 @@ OptionParser.new { |options|
     puts options
     exit
   end
-
-  raise 'No subreddit specified' if opt[:subreddit].nil?
-  raise "Subreddit name must be raw ('funny' or 'pics')" if opt[:subreddit].include?('/')
-  raise "Type must be one of [#{TYPES.join(' ')}]" unless TYPES.include?(opt[:type])
-  raise 'Count must be at least 1' if opt[:count] < 1
 }.parse!
+
+raise 'No subreddit specified' if opt[:subreddit].nil?
+raise "Subreddit name must be raw ('funny' or 'pics')" if opt[:subreddit].include?('/')
+raise "Type must be one of {#{TYPES.join(', ')}}" unless TYPES.include?(opt[:type])
+raise 'Count must be at least 1' if opt[:count] < 1
 
 nowstring = Time.now.strftime('%Y-%m-%d-%H%M')
 stylesheet = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static")
