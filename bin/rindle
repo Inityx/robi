@@ -3,46 +3,70 @@
 require './lib/fetcher'
 require './lib/compiler'
 
+require 'optparse'
 require 'time'
 
-D_SUB = 'talesfromtechsupport'.freeze
-D_TYPE = :hot
-D_COUNT = 100
-NOWSTRING = Time.now.strftime('%Y-%m-%d-%H%M').freeze
+TYPES = %i(hot new rising controversial top gilded).freeze
 
-ID = [D_SUB, D_TYPE, NOWSTRING].freeze
-TITLE_SLUG = "./#{ID.join('_')}".freeze
-TITLE = ID.join(' ').freeze
+opt = {}
 
-STYLESHEET = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static").freeze
+OptionParser.new { |options|
+  options.banner = 'Usage: rindle SUBREDDIT [-t TYPE] [-c COUNT]'
 
-raise "./#{TITLE_SLUG} not empty" if Dir.exist?("./#{TITLE_SLUG}") && (Dir.entries("./#{TITLE_SLUG}") - %w(. ..)).any?
+  opt[:subreddit] = ARGV.first
+
+  opt[:type] = :hot
+  options.on('-t', '--type TYPE', 'Hot, Top, etc.') { |type|
+    opt[:type] = type.to_sym
+  }
+
+  opt[:count] = 25
+  options.on('-c', '--count COUNT', 'Max number of posts') { |count|
+    opt[:count] = count.to_i
+  }
+
+  options.on('-h', '--help', 'Display this screen') {
+    puts options
+    exit
+  }
+
+  if ARGV.empty?
+    puts options
+    exit
+  end
+
+  raise 'No subreddit specified' if opt[:subreddit].nil?
+  raise "Subreddit name must be raw ('funny' or 'pics')" if opt[:subreddit].include?('/')
+  raise "Type must be one of [#{TYPES.join(' ')}]" unless TYPES.include?(opt[:type])
+  raise 'Count must be at least 1' if opt[:count] < 1
+}.parse!
+
+nowstring = Time.now.strftime('%Y-%m-%d-%H%M')
+stylesheet = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static")
+
+id = [opt[:subreddit], opt[:type], nowstring]
+title_slug = "./#{id.join('_')}"
+title_string = id.join(' ')
+
+if Dir.exist?("./#{title_slug}") && (Dir.entries("./#{title_slug}") - %w(. ..)).any?
+  raise "./#{title_slug} not empty"
+end
 
 puts 'Locating kindlegen'
 kindlegen_found = system('which kindlegen')
 abort unless kindlegen_found
-puts "Done.\n"
 
-puts 'Fetching posts'
-posts = Rindle::Fetcher.new(
-  D_SUB,
-  D_TYPE
-).fetch(
-  D_COUNT
-)
-puts "Done.\n"
+puts "\nFetching posts"
+posts = Rindle::Fetcher.new(*opt.values_at(:subreddit, :type))
+                       .fetch(opt[:count])
 
-puts 'Compiling to eBook source'
-metadata_file = Rindle::Compiler.new(
-  TITLE_SLUG,
-  STYLESHEET
-).compile(
-  TITLE,
-  posts
-)
-puts "Done.\n"
+puts "\nCompiling to eBook source"
+metadata_file = Rindle::Compiler.new(title_slug, stylesheet)
+                                .compile(title_string, posts)
 
-puts 'Invoking kindlegen'
+puts "\nInvoking kindlegen"
 system("kindlegen #{metadata_file} -o output.mobi")
-FileUtils.cp("#{File.dirname(metadata_file)}/output.mobi", "./#{TITLE_SLUG}.mobi")
-puts 'Done.'
+outfile = "#{File.dirname(metadata_file)}/output.mobi"
+raise 'kindlegen failed to output eBook' unless File.exist?(outfile)
+
+FileUtils.mv(outfile, "./#{title_slug}.mobi")
