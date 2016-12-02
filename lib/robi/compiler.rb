@@ -1,7 +1,7 @@
 require 'nokogiri'
 require 'fileutils'
 
-module Rindle
+class Robi
   class Compiler
     def initialize(dest_dir, stylesheet_source)
       @dest_dir = dest_dir

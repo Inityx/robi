@@ -11,14 +11,14 @@ TYPES = %i(hot new rising controversial top gilded).freeze
 opt = {}
 
 OptionParser.new { |options|
-  options.banner = 'Usage: rindle SUBREDDIT [-t TYPE] [-c COUNT]'
+  options.banner = 'Usage: robi SUBREDDIT [-t TYPE] [-c COUNT]'
 
   opt[:subreddit] = ARGV.first
   opt[:type] = :hot
   opt[:count] = 25
 
-  options.on('-t', '--type TYPE', 'Hot, Top, etc.') { |type| opt[:type] = type.downcase.to_sym }
-  options.on('-c', '--count COUNT', 'Max number of posts') { |count| opt[:count] = count.to_i }
+  options.on('-t', '--type TYPE', 'top, new, etc. (default hot)') { |type| opt[:type] = type.downcase.to_sym }
+  options.on('-c', '--count COUNT', 'Max number of posts (default 25)') { |count| opt[:count] = count.to_i }
   options.on('-h', '--help', 'Display this screen') { puts options; exit }
 }.parse!
 

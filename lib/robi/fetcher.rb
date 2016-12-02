@@ -2,14 +2,14 @@ require 'net/http'
 require 'json'
 require 'pp'
 
-require './lib/post'
+require 'robi/post'
 
-HTTP_SUCCESS = %w(200).map(&:freeze).freeze
-HTTP_REDIRECT = %w(301 302).map(&:freeze).freeze
-
-module Rindle
+class Robi
   class Fetcher
-    def initialize(subreddit, type = hot)
+    HTTP_SUCCESS = %w(200).map(&:freeze).freeze
+    HTTP_REDIRECT = %w(301 302).map(&:freeze).freeze
+
+    def initialize(subreddit, type)
       @uri = URI("https://reddit.com/r/#{subreddit}/#{type}/.json")
     end
 
@@ -23,7 +23,9 @@ module Rindle
         response = Net::HTTP.get_response(@uri)
       end
 
-      raise "Received response code #{response.code}: #{response.msg}" unless HTTP_SUCCESS.include?(response.code)
+      unless HTTP_SUCCESS.include?(response.code)
+        raise "Received response code #{response.code}: #{response.msg}"
+      end
 
       json = response.body
 
@@ -38,7 +40,7 @@ module Rindle
         .reject { |post| post['stickied'] }
         .reject { |post| post['selftext'].empty? }
         .first(count)
-        .map { |post| Rindle::Post.from_json_hash(post) }
+        .map { |post| Post.from_json_hash(post) }
     end
   end
 end

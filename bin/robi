@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'robi'
+require 'optparser'
+
+opts = OptParser.parse
+
+Robi.new(
+  opts[:subreddit],
+  opts[:type]
+).bundle(
+  opts[:count]
+)

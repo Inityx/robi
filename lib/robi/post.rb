@@ -1,6 +1,5 @@
 require 'time'
-
-module Rindle
+class Robi
   class Post
     attr_reader(
       *%i(
