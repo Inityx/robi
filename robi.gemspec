@@ -6,6 +6,7 @@ Gem::Specification.new do |spec|
   spec.description    = 'Compile Reddit to Kindle eBooks'
   spec.authors        = ['Andrew Tolvstad']
   spec.license        = 'Apache 2.0'
+  spec.homepage       = 'https://github.com/Inityx/robi'
 
   spec.files          = %w(
     lib/optparser.rb
