@@ -3,8 +3,8 @@ require 'fileutils'
 
 module Rindle
   class Compiler
-    def initialize(title_slug, stylesheet_source)
-      @dest_dir = "./#{title_slug}"
+    def initialize(dest_dir, stylesheet_source)
+      @dest_dir = dest_dir
 
       @html_file = 'index.html'
       @stylesheet_source = stylesheet_source

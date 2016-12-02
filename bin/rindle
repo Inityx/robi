@@ -14,26 +14,12 @@ OptionParser.new { |options|
   options.banner = 'Usage: rindle SUBREDDIT [-t TYPE] [-c COUNT]'
 
   opt[:subreddit] = ARGV.first
-
   opt[:type] = :hot
-  options.on('-t', '--type TYPE', 'Hot, Top, etc.') { |type|
-    opt[:type] = type.to_sym
-  }
-
   opt[:count] = 25
-  options.on('-c', '--count COUNT', 'Max number of posts') { |count|
-    opt[:count] = count.to_i
-  }
 
-  options.on('-h', '--help', 'Display this screen') {
-    puts options
-    exit
-  }
-
-  if ARGV.empty?
-    puts options
-    exit
-  end
+  options.on('-t', '--type TYPE', 'Hot, Top, etc.') { |type| opt[:type] = type.downcase.to_sym }
+  options.on('-c', '--count COUNT', 'Max number of posts') { |count| opt[:count] = count.to_i }
+  options.on('-h', '--help', 'Display this screen') { puts options; exit }
 }.parse!
 
 raise 'No subreddit specified' if opt[:subreddit].nil?
@@ -41,15 +27,18 @@ raise "Subreddit name must be raw ('funny' or 'pics')" if opt[:subreddit].includ
 raise "Type must be one of {#{TYPES.join(', ')}}" unless TYPES.include?(opt[:type])
 raise 'Count must be at least 1' if opt[:count] < 1
 
-nowstring = Time.now.strftime('%Y-%m-%d-%H%M')
-stylesheet = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static")
+id = [
+  opt[:subreddit],
+  opt[:type],
+  Time.now.strftime('%Y-%m-%d-%H%M')
+]
 
-id = [opt[:subreddit], opt[:type], nowstring]
-title_slug = "./#{id.join('_')}"
 title_string = id.join(' ')
+title_slug = id.join('_')
+dest_dir = "./#{title_slug}"
 
-if Dir.exist?("./#{title_slug}") && (Dir.entries("./#{title_slug}") - %w(. ..)).any?
-  raise "./#{title_slug} not empty"
+if Dir.exist?(dest_dir) && (Dir.entries(dest_dir) - %w(. ..)).any?
+  raise "#{dest_dir} not empty"
 end
 
 puts 'Locating kindlegen'
@@ -61,12 +50,12 @@ posts = Rindle::Fetcher.new(*opt.values_at(:subreddit, :type))
                        .fetch(opt[:count])
 
 puts "\nCompiling to eBook source"
-metadata_file = Rindle::Compiler.new(title_slug, stylesheet)
+stylesheet = File.expand_path('stylesheet.css', "#{File.dirname(__FILE__)}/../static")
+metadata_file = Rindle::Compiler.new(dest_dir, stylesheet)
                                 .compile(title_string, posts)
 
 puts "\nInvoking kindlegen"
-system("kindlegen #{metadata_file} -o output.mobi")
 outfile = "#{File.dirname(metadata_file)}/output.mobi"
+system("kindlegen #{metadata_file} -o output.mobi")
 raise 'kindlegen failed to output eBook' unless File.exist?(outfile)
-
 FileUtils.mv(outfile, "./#{title_slug}.mobi")
