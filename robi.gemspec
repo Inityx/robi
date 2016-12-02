@@ -5,7 +5,8 @@ Gem::Specification.new do |spec|
   spec.summary        = 'Robi'
   spec.description    = 'Compile Reddit to Kindle eBooks'
   spec.authors        = ['Andrew Tolvstad']
-  spec.license        = 'Apache 2.0'
+  spec.email          = 'tolvstaa@oregonstate.edu'
+  spec.license        = 'Apache-2.0'
   spec.homepage       = 'https://github.com/Inityx/robi'
 
   spec.files          = %w(
@@ -19,5 +20,5 @@ Gem::Specification.new do |spec|
   spec.executables    = ['robi']
   spec.require_paths  = ['lib']
 
-  spec.add_runtime_dependency 'nokogiri'
+  spec.add_runtime_dependency 'nokogiri', '~> 1.6', '>=1.6.8'
 end
