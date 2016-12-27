@@ -145,7 +145,7 @@ class Robi
             #   }
             #   xml.content(src: @html_file)
             # }
-            posts.zip(1..Float::INFINITY).each do |post, index|
+            posts.each.with_index(1) do |post, index|
               xml.navPoint(id: post.uid, playOrder: index) {
                 xml.navLabel {
                   xml.text_ post.title
